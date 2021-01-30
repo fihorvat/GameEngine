@@ -1,88 +1,102 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace GameEngine
 {
 	public class Game : Engine
 	{
-		public Game() : base("Game Engine" ,new Vector2(615, 512)) { }
-		Shape2D Player;
+		public Game() : base("Game Engine", new Vector2(1200, 1000)) { }
 
-		bool Up = false;
-		bool Down = false;
-		bool Left = false;
-		bool Right = false;
+		BitmapProvider BitmapProvider { get; } = new BitmapProvider();
+		GameObject _player;
 
 		public override void OnLoad()
 		{
-			Player = new Shape2D(new Vector2(30, 30), new Vector2(50, 50), "Assets/Player.png", "Player");
-
-			for (int i = 0; i < Map.GetLength(1); i++)
+			var map = MapProvider.Get;
+			var objects = new List<GameObject>();
+			for (int i = 0; i < map.GetLength(1); i++)
 			{
-				for (int j = 0; j < Map.GetLength(0); j++)
+				for (int j = 0; j < map.GetLength(0); j++)
 				{
-					if (Map[j, i] == "g")
+					if (map[j, i] == 'p')
 					{
-						new Sprite2D(new Vector2(i * 50, j * 50), new Vector2(50, 50), "Assets/Tile.png", "Tile");
+						var x = GetCenter(i, MapProvider.PlayerWidth);
+						var y = GetCenter(j, MapProvider.PlayerHeight);
+						_player = new GameObject(GameObjectType.Player, new Vector2(x, y), new Vector2(MapProvider.PlayerWidth, MapProvider.PlayerHeight), BitmapProvider.Get(GameObjectType.Player));
+						objects.Add(_player);
+					}
+
+					if (map[j, i] == 'g')
+					{
+						var tile = new GameObject(GameObjectType.Tile, new Vector2(i * MapProvider.TileWidth, j * MapProvider.TileHeight), new Vector2(MapProvider.TileWidth, MapProvider.TileHeight), BitmapProvider.Get(GameObjectType.Tile));
+						objects.Add(tile);
+					}
+
+					if (map[j, i] == 'c')
+					{
+						var x = GetCenter(i, MapProvider.CoinWidth);
+						var y = GetCenter(j, MapProvider.CoinHeight);
+						var tile = new GameObject(GameObjectType.Coin, new Vector2(x, y), new Vector2(MapProvider.CoinWidth, MapProvider.CoinHeight), BitmapProvider.Get(GameObjectType.Coin));
+						objects.Add(tile);
 					}
 				}
 			}
+
+			GameObjects.AddRange(objects);
+			AdjustCamera();
 		}
+
+		int GetCenter(int mapIndex, int gameObjectDimension) => (mapIndex * MapProvider.TileWidth) + (MapProvider.TileWidth / 2 - (gameObjectDimension / 2));
 
 		public override void OnDraw()
 		{
 		}
 
+		bool _up;
+		bool _down;
+		bool _left;
+		bool _right;
+		bool _shift;
+
 		public override void OnUpdate()
 		{
-			if (Up)
+			var playerSpeed = _shift ? 5f : 3f;
+			var lastPosition = new {_player.Position.X, _player.Position.Y };
+			if (_up) _player.Position.Y -= playerSpeed;
+			if (_down) _player.Position.Y += playerSpeed;
+			if (_left) _player.Position.X -= playerSpeed;
+			if (_right) _player.Position.X += playerSpeed;
+
+			var colideElement = GameObjects.Where(x => x.Type != GameObjectType.Player).FirstOrDefault(tile => _player.IsColliding(tile));
+			if (colideElement?.Type == GameObjectType.Tile)
 			{
-				Player.Position.Y -= 1f;
-				Log.Warning($"{Player.Position.X}:{Player.Position.Y}");
+				_player.Position.X = lastPosition.X;
+				_player.Position.Y = lastPosition.Y;
 			}
-			if (Down)
+			if(colideElement?.Type == GameObjectType.Coin)
 			{
-				Player.Position.Y += 1f;
-				Log.Warning($"{Player.Position.X}:{Player.Position.Y}");
+				GameObjects.Remove(colideElement);
 			}
-			if (Left) 
-			{ 
-				Player.Position.X -= 1f;
-				Log.Warning($"{Player.Position.X}:{Player.Position.Y}");
-			}
-			if (Right)
-			{
-				Player.Position.X += 1f;
-				Log.Warning($"{Player.Position.X}:{Player.Position.Y}");
-			}
-			
 		}
 
 		public override void OnKeyDown(KeyEventArgs e)
 		{
-			Log.Info(e.KeyCode.ToString());
-			Log.Warning($"{Player.Position.X}:{Player.Position.Y}");
-			if(e.KeyCode == Keys.W) { Up = true; }
-			if(e.KeyCode == Keys.A) { Left = true; }
-			if(e.KeyCode == Keys.S) { Down = true; }
-			if(e.KeyCode == Keys.D) { Right = true; }
+			if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up) { _up = true; }
+			if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left) { _left = true; }
+			if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down) { _down = true; }
+			if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right) { _right = true; }
+			if (e.KeyCode == Keys.ShiftKey) { _shift = true; }
 		}
 
 		public override void OnKeyUp(KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.W) { Up = false; }
-			if (e.KeyCode == Keys.A) { Left = false; }
-			if (e.KeyCode == Keys.S) { Down = false; }
-			if (e.KeyCode == Keys.D) { Right = false; }
+			if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up) { _up = false; }
+			if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left) { _left = false; }
+			if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down) { _down = false; }
+			if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right) { _right = false; }
+			if (e.KeyCode == Keys.ShiftKey) { _shift = false; }
 		}
-
-		string[,] Map = {
-			{".", ".", ".", ".", ".", ".", ".", "."},
-			{".", ".", ".", ".", ".", ".", ".", "."},
-			{".", ".", ".", ".", "g", ".", ".", "."},
-			{".", ".", ".", ".", "g", ".", ".", "."},
-			{".", ".", ".", ".", "g", ".", ".", "."},
-			{".", ".", ".", ".", "g", ".", ".", "."},
-			{".", ".", ".", ".", "g", ".", ".", "."},
-	};
 	}
 }
