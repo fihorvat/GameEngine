@@ -1,6 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
-
-namespace GameEngine
+﻿namespace GameEngine
 {
 	public class Vector2
 	{

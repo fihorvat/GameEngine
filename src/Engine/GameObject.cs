@@ -4,11 +4,6 @@ namespace GameEngine
 {
 	public class GameObject
 	{
-		public Vector2 Position;
-		public Vector2 Scale;
-		public Bitmap Sprite;
-		public GameObjectType Type;
-
 		public GameObject(GameObjectType type, Vector2 position, Vector2 scale, Bitmap sprite)
 		{
 			Type = type;
@@ -18,5 +13,10 @@ namespace GameEngine
 
 			Log.Info($"[GameObject]({type}) - Has been created!");
 		}
+
+		public Vector2 Position { get; set; }
+		public Vector2 Scale { get; set; }
+		public Bitmap Sprite { get; set; }
+		public GameObjectType Type { get; set; }
 	}
 }

@@ -62,22 +62,33 @@ namespace GameEngine
 
 		public override void OnUpdate()
 		{
-			var playerSpeed = _shift ? 5f : 3f;
-			var lastPosition = new {_player.Position.X, _player.Position.Y };
-			if (_up) _player.Position.Y -= playerSpeed;
-			if (_down) _player.Position.Y += playerSpeed;
-			if (_left) _player.Position.X -= playerSpeed;
-			if (_right) _player.Position.X += playerSpeed;
+			const double threshold = 50;
+			GameObjectsInReach = GameObjects.Where(x => x.Type != GameObjectType.Player && _player.GetDistance(x) < threshold);
+			UpdatePosition();
 
-			var colideElement = GameObjects.Where(x => x.Type != GameObjectType.Player).FirstOrDefault(tile => _player.IsColliding(tile));
+			var colideElement = GameObjectsInReach.FirstOrDefault(tile => _player.IsColliding(tile));
+			if (colideElement?.Type == GameObjectType.Coin)
+				GameObjects.Remove(colideElement);
+		}
+
+		void UpdatePosition()
+		{
+			var playerSpeed = _shift ? 5f : 3f;
+			if (_up) TryUpdatePosition(pos => pos.Y -= playerSpeed);
+			if (_down) TryUpdatePosition(pos => pos.Y += playerSpeed);
+			if (_left) TryUpdatePosition(pos => pos.X -= playerSpeed);
+			if (_right) TryUpdatePosition(pos => pos.X += playerSpeed);
+		}
+
+		void TryUpdatePosition(Action<Vector2> updateAction)
+		{
+			var lastPosition = new { _player.Position.X, _player.Position.Y };
+			updateAction(_player.Position);
+			var colideElement = GameObjectsInReach.FirstOrDefault(tile => _player.IsColliding(tile));
 			if (colideElement?.Type == GameObjectType.Tile)
 			{
 				_player.Position.X = lastPosition.X;
 				_player.Position.Y = lastPosition.Y;
-			}
-			if(colideElement?.Type == GameObjectType.Coin)
-			{
-				GameObjects.Remove(colideElement);
 			}
 		}
 
