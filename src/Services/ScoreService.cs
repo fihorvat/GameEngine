@@ -5,12 +5,15 @@ namespace GameEngine
 {
 	public static class ScoreService
 	{
-		public static ScoreResult Get(List<GameObject> gameObjects)
-		{
-			var total = MapProvider.GetCoinsCount();
-			var current = gameObjects.Where(x => x.Type == GameObjectType.Coin).Count();
+		static ScoreResult _score = new ScoreResult();
+		public static ScoreResult Get() => _score;
 
-			return new ScoreResult { Current = total - current, Total = total };
+		public static void CalculateScore(List<GameObject> gameObjects)
+		{
+			var total = MapProvider.TotalCoins;
+			var current = total - gameObjects.Count(x => x.Type == GameObjectType.Coin);
+
+			_score = new ScoreResult { Current = current, Total = total, IsEnd = total == current };
 		}
 	}
 
@@ -18,5 +21,6 @@ namespace GameEngine
 	{
 		public int Current { get; set; }
 		public int Total { get; set; }
+		public bool IsEnd { get; set; }
 	}
 }

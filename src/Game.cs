@@ -11,10 +11,15 @@ namespace GameEngine
 
 		BitmapProvider BitmapProvider { get; } = new BitmapProvider();
 		GameObject _player;
+		const int _coinsCount = 20;
 
 		public override void OnLoad()
 		{
-			var map = MapProvider.Get;
+			GameObjects.Clear();
+			GameTime.Restart();
+			MapProvider.InitializeMap(_coinsCount);
+
+			var map = MapProvider.Map;
 			var objects = new List<GameObject>();
 			for (int i = 0; i < map.GetLength(1); i++)
 			{
@@ -45,6 +50,7 @@ namespace GameEngine
 			}
 
 			GameObjects.AddRange(objects);
+			ScoreService.CalculateScore(GameObjects);
 			AdjustCamera();
 		}
 
@@ -53,12 +59,6 @@ namespace GameEngine
 		public override void OnDraw()
 		{
 		}
-
-		bool _up;
-		bool _down;
-		bool _left;
-		bool _right;
-		bool _shift;
 
 		public override void OnUpdate()
 		{
@@ -69,6 +69,32 @@ namespace GameEngine
 			var colideElement = GameObjectsInReach.FirstOrDefault(tile => _player.IsColliding(tile));
 			if (colideElement?.Type == GameObjectType.Coin)
 				GameObjects.Remove(colideElement);
+
+			ScoreService.CalculateScore(GameObjects);
+		}
+
+		bool _up;
+		bool _down;
+		bool _left;
+		bool _right;
+		bool _shift;
+
+		public override void OnKeyDown(KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up) { _up = true; }
+			if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left) { _left = true; }
+			if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down) { _down = true; }
+			if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right) { _right = true; }
+			if (e.KeyCode == Keys.ShiftKey) { _shift = true; }
+		}
+
+		public override void OnKeyUp(KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up) { _up = false; }
+			if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left) { _left = false; }
+			if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down) { _down = false; }
+			if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right) { _right = false; }
+			if (e.KeyCode == Keys.ShiftKey) { _shift = false; }
 		}
 
 		void UpdatePosition()
@@ -90,24 +116,6 @@ namespace GameEngine
 				_player.Position.X = lastPosition.X;
 				_player.Position.Y = lastPosition.Y;
 			}
-		}
-
-		public override void OnKeyDown(KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up) { _up = true; }
-			if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left) { _left = true; }
-			if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down) { _down = true; }
-			if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right) { _right = true; }
-			if (e.KeyCode == Keys.ShiftKey) { _shift = true; }
-		}
-
-		public override void OnKeyUp(KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.W || e.KeyCode == Keys.Up) { _up = false; }
-			if (e.KeyCode == Keys.A || e.KeyCode == Keys.Left) { _left = false; }
-			if (e.KeyCode == Keys.S || e.KeyCode == Keys.Down) { _down = false; }
-			if (e.KeyCode == Keys.D || e.KeyCode == Keys.Right) { _right = false; }
-			if (e.KeyCode == Keys.ShiftKey) { _shift = false; }
 		}
 	}
 }
