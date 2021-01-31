@@ -13,7 +13,7 @@ namespace GameEngine
 
 		public static void Info(string msg)
 		{
-			Console.ForegroundColor = ConsoleColor.Cyan;
+			Console.ForegroundColor = ConsoleColor.DarkGreen;
 			Console.WriteLine($"[INFO] - {msg}");
 			Console.ForegroundColor = ConsoleColor.White;
 		}

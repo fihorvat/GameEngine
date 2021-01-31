@@ -1,8 +1,11 @@
-﻿# GameEngine 🚀
-Simple game engine written in C#. It is created in Full framework version since I need Windows Forms and Windows api for this game.
-This is the First try of creating simple game engine and it turned out pretty good in my opinion. 😀
+﻿# 🎰 Game Engine 🚀
 
-## Commands
+A simple game engine is written in C#. It is created in the .Net Full Framework version since it needs Windows Forms and Windows Api for this game.
+This is my first try creating a simple game engine and it turned out pretty good in my opinion. 🚗😀
+
+The game goal is to collect all the coins in the shortest time possible. Each new game recreates the coins and player in different locations. When all coins are collected, time stops. ⏰
+
+## Commands 🕹
 
 - Go Up: `Up arrow` or `W`
 - Go Down: `Down arrow` or `S`
@@ -10,14 +13,24 @@ This is the First try of creating simple game engine and it turned out pretty go
 - Go Right: `Right arrow` or `D`
 - Sprint: `Shift`
 
-### Game mods
-Game has two modes that (currently) can only be switched in code
-- Flash lite mode
-- Normal mode
+## Menu 📝
 
-## Flash lite mode
-![game](./images/game.png)
+Menu has 4 options:
+- New game
+- Pause / Resume
+- Show map
+- Exit
 
+### Game mods 🎮
 
-## Normal mode
-![game](./images/game2.png)
+Game has two modes
+- **Flashlight mode** - player can only see a small part of a screen
+- **Show map mode** - whole map becomes visible
+
+## Flashlight mode
+
+![Flashlight mode](./images/game.png)
+
+## Show map mode
+
+![Show map mode](./images/game2.png)
